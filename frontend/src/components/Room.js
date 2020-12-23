@@ -29,9 +29,10 @@ const Room = (props) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     };
-    const response = await fetch(`/api/leave-room`, requestOptions);
-    props.leaveRoomCallback();
-    props.history.push('/');
+    await fetch(`/api/leave-room`, requestOptions).then((_response) => {
+      props.leaveRoomCallback();
+      props.history.push('/');
+    });
   };
 
   return (
@@ -60,7 +61,7 @@ const Room = (props) => {
         <Button
           variant='contained'
           color='secondary'
-          onClick={() => leaveButtonPressed}
+          onClick={leaveButtonPressed}
         >
           Leave Room
         </Button>
