@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Grid, Button, Typography } from '@material-ui/core';
+import CreateRoomPage from './CreateRoomPage';
 
 const Room = (props) => {
   const [votesToSkip, setVotesToSkip] = useState(2);
   const [guestCanPause, setGuestCanPause] = useState(false);
   const [isHost, setIsHost] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const roomCode = props.match.params.roomCode;
 
@@ -35,6 +37,53 @@ const Room = (props) => {
     });
   };
 
+  const updateShowSettings = (value) => {
+    setShowSettings(value);
+  };
+
+  const renderSettings = () => {
+    return (
+      <Grid container spacing={1}>
+        <Grid item xs={12} align='center'>
+          <CreateRoomPage
+            update={true}
+            votesToSkip={votesToSkip}
+            guestCanPause={guestCanPause}
+            roomCode={roomCode}
+            updateCallback={getRoomDetails}
+          />
+        </Grid>
+        <Grid item xs={12} align='center'>
+          <Button
+            variant='contained'
+            color='secondary'
+            onClick={() => updateShowSettings(false)}
+          >
+            Close
+          </Button>
+        </Grid>
+      </Grid>
+    );
+  };
+
+  const renderSettingsButton = () => {
+    return (
+      <Grid item xs={12} align='center'>
+        <Button
+          variant='contained'
+          color='primary'
+          onClick={() => updateShowSettings(true)}
+        >
+          Settings
+        </Button>
+      </Grid>
+    );
+  };
+
+  if (showSettings) {
+    return renderSettings();
+  }
+
   return (
     <Grid container spacing={1}>
       <Grid item xs={12} align='center'>
@@ -57,6 +106,7 @@ const Room = (props) => {
           Host: {isHost.toString()}
         </Typography>
       </Grid>
+      {isHost ? renderSettingsButton() : null}
       <Grid item xs={12} align='center'>
         <Button
           variant='contained'
