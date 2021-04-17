@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Grid, Button, Typography } from '@material-ui/core';
-import CreateRoomPage from './CreateRoomPage';
+import React, { useState, useEffect } from "react";
+import { Grid, Button, Typography } from "@material-ui/core";
+import CreateRoomPage from "./CreateRoomPage";
 
 const Room = (props) => {
   const [votesToSkip, setVotesToSkip] = useState(2);
   const [guestCanPause, setGuestCanPause] = useState(false);
   const [isHost, setIsHost] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [spotifyAuthenticated, setSpotifyAuthenticated] = useState(false);
 
   const roomCode = props.match.params.roomCode;
 
@@ -18,22 +19,42 @@ const Room = (props) => {
     const response = await fetch(`/api/get-room?code=${roomCode}`);
     if (!response.ok) {
       props.leaveRoomCallback();
-      props.history.push('/');
+      props.history.push("/");
     }
     const data = await response.json();
     setVotesToSkip(data.votes_to_skip);
     setGuestCanPause(data.guest_can_pause);
     setIsHost(data.is_host);
+
+    if (isHost) {
+      authenticateSpotify();
+    }
+  };
+
+  const authenticateSpotify = () => {
+    fetch("/spotify/is-authenticated")
+      .then((response) => response.json())
+      .then((data) => {
+        setSpotifyAuthenticated(data.status);
+        console.log(data.status);
+        if (!data.status) {
+          fetch("/spotify/get-auth-url")
+            .then((response) => response.json())
+            .then((data) => {
+              window.location.replace(data.url);
+            });
+        }
+      });
   };
 
   const leaveButtonPressed = async () => {
     const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
     };
     await fetch(`/api/leave-room`, requestOptions).then((_response) => {
       props.leaveRoomCallback();
-      props.history.push('/');
+      props.history.push("/");
     });
   };
 
@@ -44,7 +65,7 @@ const Room = (props) => {
   const renderSettings = () => {
     return (
       <Grid container spacing={1}>
-        <Grid item xs={12} align='center'>
+        <Grid item xs={12} align="center">
           <CreateRoomPage
             update={true}
             votesToSkip={votesToSkip}
@@ -53,10 +74,10 @@ const Room = (props) => {
             updateCallback={getRoomDetails}
           />
         </Grid>
-        <Grid item xs={12} align='center'>
+        <Grid item xs={12} align="center">
           <Button
-            variant='contained'
-            color='secondary'
+            variant="contained"
+            color="secondary"
             onClick={() => updateShowSettings(false)}
           >
             Close
@@ -68,10 +89,10 @@ const Room = (props) => {
 
   const renderSettingsButton = () => {
     return (
-      <Grid item xs={12} align='center'>
+      <Grid item xs={12} align="center">
         <Button
-          variant='contained'
-          color='primary'
+          variant="contained"
+          color="primary"
           onClick={() => updateShowSettings(true)}
         >
           Settings
@@ -86,31 +107,31 @@ const Room = (props) => {
 
   return (
     <Grid container spacing={1}>
-      <Grid item xs={12} align='center'>
-        <Typography variant='h4' component='h4'>
+      <Grid item xs={12} align="center">
+        <Typography variant="h4" component="h4">
           Code: {roomCode}
         </Typography>
       </Grid>
-      <Grid item xs={12} align='center'>
-        <Typography variant='h6' component='h6'>
+      <Grid item xs={12} align="center">
+        <Typography variant="h6" component="h6">
           Votes: {votesToSkip}
         </Typography>
       </Grid>
-      <Grid item xs={12} align='center'>
-        <Typography variant='h6' component='h6'>
+      <Grid item xs={12} align="center">
+        <Typography variant="h6" component="h6">
           Guest Can Pause: {guestCanPause.toString()}
         </Typography>
       </Grid>
-      <Grid item xs={12} align='center'>
-        <Typography variant='h6' component='h6'>
+      <Grid item xs={12} align="center">
+        <Typography variant="h6" component="h6">
           Host: {isHost.toString()}
         </Typography>
       </Grid>
       {isHost ? renderSettingsButton() : null}
-      <Grid item xs={12} align='center'>
+      <Grid item xs={12} align="center">
         <Button
-          variant='contained'
-          color='secondary'
+          variant="contained"
+          color="secondary"
           onClick={leaveButtonPressed}
         >
           Leave Room
